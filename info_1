@@ -1,0 +1,25 @@
+
+Without PgBouncer: Each time Airflow talks to the database, it opens a new connection. Too many connections can overwhelm the database and slow things down.
+
+With PgBouncer: PgBouncer acts as a middleman. Instead of Airflow opening many connections directly, PgBouncer keeps a small pool of connections open and shares them between tasks, reducing the load on the database.
+
+
+====================
+
+Without PgBouncer (or connection pooling):
+Airflow Tasks: Each task in Airflow talks to the database (PostgreSQL) to read/write information, like task status or logs.
+Problem: Every time a task runs, it opens a new connection to the database. If you have lots of tasks running at the same time, you could quickly have too many open connections. This slows down your database because it can't handle so many at once.
+
+With PgBouncer (connection pooling):
+Pooling: PgBouncer is like a "connection manager." It creates a limited number of connections to the database, say 40 connections, and keeps them open.
+Reuse: Instead of opening a new connection every time, Airflow tasks share these existing connections. When a task finishes, the connection goes back into the pool and can be used by the next task.
+Benefit: This reduces the total number of database connections, making things faster and preventing overload.
+
+In short, PgBouncer manages database connections efficiently, letting multiple tasks share connections instead of opening a new one each time. This keeps your database happy and running smoothly!
+
+ For example, if Airflow runs 100 tasks at the same time, 100 separate connections are opened to PostgreSQL.
+ 
+ Resource-heavy: Opening and closing database connections is resource-intensive (CPU, memory, network), especially when there are many tasks or high DAG concurrency.
+ 
+ ==
+ Even if 100 tasks run simultaneously, PgBouncer might only use 20 database connections (depending on pool size).
